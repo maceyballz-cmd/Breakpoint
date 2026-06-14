@@ -167,146 +167,45 @@
 
     </section>
 
-    <!-- SKILLS -->
+  /* Progress Bars */
+.progress-container {
+    width: 100%;
+    background-color: #16213e;
+    border-radius: 10px;
+    height: 10px;
+    margin: 10px 0;
+    overflow: hidden;
+}
 
-    <section id="skills-page" class="page">
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    width: 0%; /* JS updates this */
+    transition: width 0.3s ease;
+}
 
-        <div class="card">
+/* Skill Buttons */
+.skill-btn, .handstand-btn, .frontlever-btn {
+    width: 100%;
+    padding: 12px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 8px;
+    background-color: #0f3460;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+}
 
-            <h2>Planche Progression</h2>
+.skill-complete {
+    background-color: #2e7d32 !important;
+}
 
-            <div class="progress-container">
-    <div id="planche-progress-bar" class="progress-bar"></div>
-</div>
-
-<p id="planche-progress-text">0%</p>
-
-          <div id="planche-skills">
-
-    <button class="skill-btn" data-index="0" onclick="toggleSkill(this)">
-        Frog Stand
-    </button>
-
-    <button class="skill-btn" data-index="1" onclick="toggleSkill(this)">
-        Tuck Planche
-    </button>
-
-    <button class="skill-btn" data-index="2" onclick="toggleSkill(this)">
-        Advanced Tuck
-    </button>
-
-    <button class="skill-btn" data-index="3" onclick="toggleSkill(this)">
-        Open Tuck
-    </button>
-
-    <button class="skill-btn"data-index="4" onclick="toggleSkill(this)">
-        Straddle
-    </button>
-
-    <button class="skill-btn" data-index="5" onclick="toggleSkill(this)">
-        Full Planche
-    </button>
-
-</div>
-
-        </div>
-        <div class="card">
-
-    <h2>Handstand Progression</h2>
-
-    <div class="progress-container">
-        <div id="handstand-progress-bar" class="progress-bar"></div>
-    </div>
-
-    <p id="handstand-progress-text">0%</p>
-
-    <div id="handstand-skills">
-
-        <button class="skill-btn handstand-btn"
-            data-index="0"
-            onclick="toggleHandstand(this)">
-            Wall Handstand
-        </button>
-
-        <button class="skill-btn handstand-btn"
-            data-index="1"
-            onclick="toggleHandstand(this)">
-            Chest-to-Wall Handstand
-        </button>
-
-        <button class="skill-btn handstand-btn"
-            data-index="2"
-            onclick="toggleHandstand(this)">
-            Freestanding 5s
-        </button>
-
-        <button class="skill-btn handstand-btn"
-            data-index="3"
-            onclick="toggleHandstand(this)">
-            Freestanding 15s
-        </button>
-
-        <button class="skill-btn handstand-btn"
-            data-index="4"
-            onclick="toggleHandstand(this)">
-            Freestanding 30s
-        </button>
-
-        <button class="skill-btn handstand-btn"
-            data-index="5"
-            onclick="toggleHandstand(this)">
-            Handstand Push-up
-        </button>
-
-    </div>
-
-</div>
-
-
-
-        <h2>Front Lever Progression</h2>
-
-<div class="progress-container">
-    <div id="frontlever-progress-bar" class="progress-bar"></div>
-</div>
-
-<p id="frontlever-progress-text">0%</p>
-
-<div id="frontlever-skills">
-
-    <button class="skill-btn frontlever-btn"
-        data-index="0"
-        onclick="toggleFrontLever(this)">
-        Tuck
-    </button>
-
-    <button class="skill-btn frontlever-btn"
-        data-index="1"
-        onclick="toggleFrontLever(this)">
-        Advanced Tuck
-    </button>
-
-    <button class="skill-btn frontlever-btn"
-        data-index="2"
-        onclick="toggleFrontLever(this)">
-        One Leg
-    </button>
-
-    <button class="skill-btn frontlever-btn"
-        data-index="3"
-        onclick="toggleFrontLever(this)">
-        Straddle
-    </button>
-
-    <button class="skill-btn frontlever-btn"
-        data-index="4"
-        onclick="toggleFrontLever(this)">
-        Full Lever
-    </button>
-
-</div>
-
-    </section>
+.skill-locked {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
     <!-- PROGRESS page -->
 
