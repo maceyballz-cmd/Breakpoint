@@ -86,19 +86,41 @@ button{
     border-radius:10px;
 }
 
-.bottom-nav{
-    position:fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    background:#1e293b;
-
-    display:flex;
-    justify-content:space-around;
-
-    padding:15px;
+/* Navigation Bar Styling */
+nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #1a1a2e;
+    display: flex;
+    justify-content: space-around; /* Distributes buttons evenly */
+    padding: 10px 0;
+    border-top: 2px solid #16213e;
+    z-index: 1000;
 }
 
+nav button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 10px; /* Smaller text for mobile */
+    display: flex;
+    flex-direction: column; /* Icon on top, Text on bottom */
+    align-items: center;
+    cursor: pointer;
+    flex: 1; /* Each button takes equal space */
+}
+
+nav button span {
+    font-size: 20px; /* Make the emojis bigger */
+    margin-bottom: 2px;
+}
+
+/* Add padding to the bottom of pages so the nav doesn't cover content */
+.page {
+    padding-bottom: 80px; 
+}
 
 .skill-btn.skill-complete{
     background:#16a34a !important;
