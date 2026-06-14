@@ -1,22 +1,39 @@
-// ==========================================
-// 1. INITIAL DATA LOADING
-// ==========================================
+// 1. DATA LOADING
 let workouts = JSON.parse(localStorage.getItem("breakpoint")) || [];
 let skills = JSON.parse(localStorage.getItem("skills")) || {};
 let handstandSkills = JSON.parse(localStorage.getItem("handstandSkills")) || {};
 let frontLeverSkills = JSON.parse(localStorage.getItem("frontLeverSkills")) || {};
-
 let customExercises = JSON.parse(localStorage.getItem("customExercises")) || ["Push-ups", "Pull-ups", "Dips"];
-let warmupExercises = JSON.parse(localStorage.getItem("warmupExercises")) || ["Wrist Circles", "Shoulder Dislocates", "Cat-Cow"];
-
+let warmupExercises = JSON.parse(localStorage.getItem("warmupExercises")) || ["Wrist Circles", "Shoulder Dislocates"];
 let currentWorkout = [];
 
-// ==========================================
-// 2. DATABASE MANAGEMENT
-// ==========================================
+// 2. NAVIGATION (Safe Version)
+function showPage(pageId) {
+    const pages = document.querySelectorAll(".page");
+    const targetPage = document.getElementById(pageId);
 
+    if (!targetPage) {
+        console.error("Page ID not found:", pageId);
+        return;
+    }
+
+    pages.forEach(page => {
+        page.classList.remove("active");
+        page.style.display = "none";
+    });
+
+    targetPage.classList.add("active");
+    targetPage.style.display = "block";
+
+    if (pageId === 'history-page') renderHistory();
+    if (pageId === 'dashboard-page') render();
+    renderDropdowns();
+}
+
+// 3. DATABASE MANAGEMENT
 function renderDropdowns() {
     const exSelect = document.getElementById("exercise-builder");
+    const wuSelect = document.getElementById("warmup-builder");
     if (exSelect) {
         exSelect.innerHTML = "";
         customExercises.forEach(ex => {
@@ -25,8 +42,6 @@ function renderDropdowns() {
             exSelect.appendChild(opt);
         });
     }
-
-    const wuSelect = document.getElementById("warmup-builder");
     if (wuSelect) {
         wuSelect.innerHTML = "";
         warmupExercises.forEach(wu => {
@@ -38,56 +53,40 @@ function renderDropdowns() {
 }
 
 function addNewWarmupToList() {
-    const input = document.getElementById("new-warmup-name");
-    const name = input.value.trim();
+    const name = document.getElementById("new-warmup-name").value.trim();
     if (name && !warmupExercises.includes(name)) {
         warmupExercises.push(name);
         localStorage.setItem("warmupExercises", JSON.stringify(warmupExercises));
-        input.value = "";
-        renderDropdowns();
-    }
-}
-
-function deleteWarmupFromList() {
-    const select = document.getElementById("warmup-builder");
-    const name = select.value;
-    if (name && confirm(`Remove "${name}" from Warm-ups?`)) {
-        warmupExercises = warmupExercises.filter(w => w !== name);
-        localStorage.setItem("warmupExercises", JSON.stringify(warmupExercises));
+        document.getElementById("new-warmup-name").value = "";
         renderDropdowns();
     }
 }
 
 function addNewExerciseToList() {
-    const input = document.getElementById("new-exercise-name");
-    const name = input.value.trim();
+    const name = document.getElementById("new-exercise-name").value.trim();
     if (name && !customExercises.includes(name)) {
         customExercises.push(name);
         localStorage.setItem("customExercises", JSON.stringify(customExercises));
-        input.value = "";
+        document.getElementById("new-exercise-name").value = "";
         renderDropdowns();
     }
 }
 
 function deleteExerciseFromList() {
-    const select = document.getElementById("exercise-builder");
-    const name = select.value;
-    if (name && confirm(`Remove "${name}"?`)) {
+    const name = document.getElementById("exercise-builder").value;
+    if (name && confirm(`Delete ${name}?`)) {
         customExercises = customExercises.filter(ex => ex !== name);
         localStorage.setItem("customExercises", JSON.stringify(customExercises));
         renderDropdowns();
     }
 }
 
-// ==========================================
-// 3. WORKOUT LOGIC
-// ==========================================
-
+// 4. WORKOUT BUILDER
 function addWarmupToWorkout() {
     const exercise = document.getElementById("warmup-builder").value;
     const reps = Number(document.getElementById("warmup-reps").value);
-    if (!reps) return alert("Enter reps/seconds!");
-    currentWorkout.push({ exercise, sets: [reps, reps, reps], isWarmup: true, notes: "" });
+    if (!reps) return;
+    currentWorkout.push({ exercise, sets: [reps, reps, reps], isWarmup: true });
     renderCurrentWorkout();
     document.getElementById("warmup-reps").value = "";
 }
@@ -100,8 +99,13 @@ function addExercise() {
         Number(document.getElementById("set3").value),
         Number(document.getElementById("set4").value)
     ].filter(s => s > 0);
-    if (sets.length === 0) return alert("Enter sets!");
-    currentWorkout.push({ exercise, sets, isWarmup: false, notes: document.getElementById("workout-notes").value });
+    if (sets.length === 0) return;
+    currentWorkout.push({ 
+        exercise, 
+        sets, 
+        isWarmup: false, 
+        notes: document.getElementById("workout-notes").value 
+    });
     renderCurrentWorkout();
     ["set1", "set2", "set3", "set4", "workout-notes"].forEach(id => document.getElementById(id).value = "");
 }
@@ -109,22 +113,15 @@ function addExercise() {
 function renderCurrentWorkout() {
     let html = "";
     currentWorkout.forEach((item, index) => {
-        const color = item.isWarmup ? '#ff9800' : '#2196F3';
-        html += `
-        <div class="workout-entry" style="border-left: 4px solid ${color}">
-            <strong>${item.isWarmup ? '🔥' : '💪'} ${item.exercise}</strong><br>
-            ${item.sets.join(" / ")}
-            ${item.notes ? `<br><small>📝 ${item.notes}</small>` : ""}
-            <br><button onclick="removeExercise(${index})" class="delete-btn" style="font-size: 10px;">❌ Remove</button>
+        html += `<div class="workout-entry" style="border-left:4px solid ${item.isWarmup ? '#ff9800' : '#2196F3'}">
+            <strong>${item.exercise}</strong> (${item.sets.join("/")})
+            <button onclick="removeExercise(${index})">❌</button>
         </div>`;
     });
     document.getElementById("current-workout").innerHTML = html;
 }
 
-function removeExercise(index) {
-    currentWorkout.splice(index, 1);
-    renderCurrentWorkout();
-}
+function removeExercise(i) { currentWorkout.splice(i, 1); renderCurrentWorkout(); }
 
 function saveFullWorkout() {
     if (currentWorkout.length === 0) return;
@@ -132,179 +129,94 @@ function saveFullWorkout() {
     localStorage.setItem("breakpoint", JSON.stringify(workouts));
     currentWorkout = [];
     renderCurrentWorkout();
-    render();
+    showPage('dashboard-page');
 }
 
-// ==========================================
-// 4. HISTORY LOGIC (NEW)
-// ==========================================
-
-function renderHistory() {
-    const historyList = document.getElementById("workout-history-list");
-    if (!historyList) return;
-
-    if (workouts.length === 0) {
-        historyList.innerHTML = "<p>No workouts recorded yet.</p>";
-        return;
-    }
-
-    let html = "";
-    // Show newest workouts first
-    [...workouts].reverse().forEach((workout, reversedIndex) => {
-        const actualIndex = workouts.length - 1 - reversedIndex;
-        
-        html += `
-        <div class="card" style="margin-bottom: 20px; border-top: 4px solid #444;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3 style="margin: 0;">📅 ${workout.date}</h3>
-                <button onclick="deleteWorkout(${actualIndex})" class="delete-btn" style="padding: 5px 10px;">🗑️ Delete</button>
-            </div>
-            <hr>
-            <div style="margin-top: 10px;">
-        `;
-
-        workout.exercises.forEach(ex => {
-            const icon = ex.isWarmup ? "🔥" : "💪";
-            html += `
-                <div style="margin-bottom: 8px;">
-                    <strong>${icon} ${ex.exercise}</strong>: ${ex.sets.join(" / ")}
-                    ${ex.notes ? `<br><small style="color: #888; margin-left: 20px;">📝 ${ex.notes}</small>` : ""}
-                </div>
-            `;
-        });
-
-        html += `</div></div>`;
-    });
-
-    historyList.innerHTML = html;
-}
-
-function deleteWorkout(index) {
-    if (confirm("Are you sure you want to delete this workout from history?")) {
-        workouts.splice(index, 1);
-        localStorage.setItem("breakpoint", JSON.stringify(workouts));
-        renderHistory();
-        render(); // Update dashboard stats
-    }
-}
-
-// ==========================================
-// 5. STATS & STREAK
-// ==========================================
-
+// 5. STATS & HISTORY
 function calculateStreak() {
     if (workouts.length === 0) return 0;
-    const uniqueDates = [...new Set(workouts.map(w => w.date))].map(d => new Date(d)).sort((a, b) => b - a);
+    const dates = [...new Set(workouts.map(w => w.date))].map(d => new Date(d)).sort((a,b) => b-a);
     let streak = 0;
-    let today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const lastWorkout = new Date(uniqueDates[0]);
-    lastWorkout.setHours(0,0,0,0);
-    const diff = Math.floor((today - lastWorkout) / 86400000);
-    if (diff > 1) return 0;
-    for (let i = 0; i < uniqueDates.length; i++) {
-        if (i === 0) { streak = 1; continue; }
-        let gap = (new Date(uniqueDates[i-1]).setHours(0,0,0,0) - new Date(uniqueDates[i]).setHours(0,0,0,0)) / 86400000;
-        if (gap === 1) streak++; else break;
+    let today = new Date(); today.setHours(0,0,0,0);
+    if (Math.floor((today - dates[0])/86400000) > 1) return 0;
+    for (let i=0; i<dates.length; i++) {
+        if (i===0 || (dates[i-1]-dates[i])/86400000 === 1) streak++; else break;
     }
     return streak;
 }
 
-function getPRs() {
-    const prs = {};
-    workouts.forEach(w => {
-        if (!w.exercises) return;
-        w.exercises.forEach(ex => {
-            if (ex.isWarmup) return;
-            const best = Math.max(...ex.sets);
-            if (!prs[ex.exercise] || best > prs[ex.exercise]) prs[ex.exercise] = best;
-        });
-    });
-    return prs;
-}
-
-// ==========================================
-// 6. DASHBOARD & SKILLS
-// ==========================================
-
 function render() {
     document.getElementById("total-workouts").textContent = workouts.length;
     document.getElementById("streak").textContent = calculateStreak() + " Days";
-
-    if (workouts.length > 0) {
-        const latest = workouts[workouts.length - 1];
-        let latestHTML = "";
-        latest.exercises.forEach(ex => {
-            latestHTML += `<div><strong>${ex.isWarmup ? '🔥' : '💪'} ${ex.exercise}</strong>: ${ex.sets.join("/")}</div>`;
-        });
-        document.getElementById("latest-workout").innerHTML = latestHTML;
-    }
-
-    const prs = getPRs();
-    let prsHTML = "";
-    Object.entries(prs).forEach(([ex, val]) => { prsHTML += `<div class="pr">🏆 ${ex}: ${val}</div>`; });
-    document.getElementById("prs").innerHTML = prsHTML;
+    const prs = {};
+    workouts.forEach(w => w.exercises.forEach(ex => {
+        if (ex.isWarmup) return;
+        const best = Math.max(...ex.sets);
+        if (!prs[ex.exercise] || best > prs[ex.exercise]) prs[ex.exercise] = best;
+    }));
+    let prHTML = "";
+    Object.entries(prs).forEach(([ex, val]) => prHTML += `<div>🏆 ${ex}: ${val}</div>`);
+    document.getElementById("prs").innerHTML = prHTML;
 }
 
-function showPage(pageId) {
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    document.getElementById(pageId).classList.add("active");
-    // Special: If going to history, render it
-    if(pageId === 'history-page') renderHistory();
+function renderHistory() {
+    let html = "";
+    [...workouts].reverse().forEach((w, i) => {
+        html += `<div class="card"><h3>${w.date}</h3>`;
+        w.exercises.forEach(ex => html += `<div>${ex.exercise}: ${ex.sets.join("/")}</div>`);
+        html += `<button onclick="deleteWorkout(${workouts.length-1-i})" class="delete-btn">Delete</button></div>`;
+    });
+    document.getElementById("workout-history-list").innerHTML = html || "No history yet.";
 }
 
-function toggleSkillGeneric(button, storageObj, storageKey, selector, renderFn) {
-    const buttons = [...document.querySelectorAll(selector)];
-    const index = Number(button.dataset.index);
-    const skillName = button.textContent.replace("✓ ", "").replace("🔒 ", "").trim();
-    if (index > 0) {
-        const prev = buttons[index - 1].textContent.replace("✓ ", "").replace("🔒 ", "").trim();
-        if (!storageObj[prev]) return;
-    }
-    storageObj[skillName] = !storageObj[skillName];
-    localStorage.setItem(storageKey, JSON.stringify(storageObj));
-    renderFn();
-    render();
-}
+function deleteWorkout(i) { workouts.splice(i,1); localStorage.setItem("breakpoint", JSON.stringify(workouts)); renderHistory(); render(); }
 
-function toggleSkill(btn) { toggleSkillGeneric(btn, skills, "skills", "#planche-skills .skill-btn", renderSkills); }
-function toggleHandstand(btn) { toggleSkillGeneric(btn, handstandSkills, "handstandSkills", ".handstand-btn", renderHandstandSkills); }
-function toggleFrontLever(btn) { toggleSkillGeneric(btn, frontLeverSkills, "frontLeverSkills", ".frontlever-btn", renderFrontLeverSkills); }
-
+// 6. SKILLS
 function renderSkillCategory(selector, storageObj, progressId, textId) {
     const buttons = [...document.querySelectorAll(selector)];
-    let completed = 0;
+    let done = 0;
     buttons.forEach((btn, i) => {
-        const skill = btn.textContent.replace("✓ ", "").replace("🔒 ", "").trim();
+        const name = btn.textContent.replace("✓ ", "").replace("🔒 ", "").trim();
         btn.classList.remove("skill-complete", "skill-locked");
-        let locked = (i > 0 && !storageObj[buttons[i-1].textContent.replace("✓ ", "").replace("🔒 ", "").trim()]);
-        if (storageObj[skill]) { btn.classList.add("skill-complete"); btn.innerHTML = "✓ " + skill; completed++; }
-        else if (locked) { btn.classList.add("skill-locked"); btn.innerHTML = "🔒 " + skill; }
-        else btn.innerHTML = skill;
+        if (storageObj[name]) { btn.classList.add("skill-complete"); btn.innerHTML = "✓ " + name; done++; }
+        else if (i > 0 && !storageObj[buttons[i-1].textContent.replace("✓ ", "").replace("🔒 ", "").trim()]) {
+            btn.classList.add("skill-locked"); btn.innerHTML = "🔒 " + name;
+        } else btn.innerHTML = name;
     });
-    const pct = Math.round((completed / buttons.length) * 100) || 0;
+    const pct = Math.round((done/buttons.length)*100) || 0;
     document.getElementById(progressId).style.width = pct + "%";
     document.getElementById(textId).textContent = pct + "%";
 }
-
-function renderSkills() { renderSkillCategory("#planche-skills .skill-btn", skills, "planche-progress-bar", "planche-progress-text"); }
-function renderHandstandSkills() { renderSkillCategory(".handstand-btn", handstandSkills, "handstand-progress-bar", "handstand-progress-text"); }
-function renderFrontLeverSkills() { renderSkillCategory(".frontlever-btn", frontLeverSkills, "frontlever-progress-bar", "frontlever-progress-text"); }
-
-// ==========================================
-// 7. INITIALIZE APP
-// ==========================================
-showPage("dashboard-page");
-render();
-renderSkills();
-renderHandstandSkills();
-renderFrontLeverSkills();
-renderDropdowns();
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker Registered'))
-      .catch(err => console.log('Service Worker Failed', err));
-  });
+function renderSkills() { 
+    renderSkillCategory(".skill-btn", skills, "planche-progress-bar", "planche-progress-text");
+    renderSkillCategory(".handstand-btn", handstandSkills, "handstand-progress-bar", "handstand-progress-text");
+    renderSkillCategory(".frontlever-btn", frontLeverSkills, "frontlever-progress-bar", "frontlever-progress-text");
 }
+function toggleSkillGeneric(btn, obj, key, sel, ren) {
+    const name = btn.textContent.replace("✓ ", "").replace("🔒 ", "").trim();
+    obj[name] = !obj[name]; localStorage.setItem(key, JSON.stringify(obj)); ren(); render();
+}
+function toggleSkill(b) { toggleSkillGeneric(b, skills, "skills", ".skill-btn", renderSkills); }
+function toggleHandstand(b) { toggleSkillGeneric(b, handstandSkills, "handstandSkills", ".handstand-btn", renderSkills); }
+function toggleFrontLever(b) { toggleSkillGeneric(b, frontLeverSkills, "frontLeverSkills", ".frontlever-btn", renderSkills); }
+
+// 7. BACKUP
+function exportData() {
+    const data = JSON.stringify(localStorage);
+    const blob = new Blob([data], {type: "application/json"});
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "backup.json"; a.click();
+}
+function importData(e) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const data = JSON.parse(event.target.result);
+        Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+        location.reload();
+    };
+    reader.readAsText(e.target.files[0]);
+}
+
+// INIT
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+showPage('dashboard-page');
+renderSkills();
