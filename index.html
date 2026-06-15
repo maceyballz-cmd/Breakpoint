@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BreakPoint</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <img src="logo.png" alt="BreakPoint Logo" class="logo">
+        <p>Calisthenics Progress Tracker</p>
+    </header>
+
+    <main>
+        <!-- DASHBOARD PAGE -->
+        <div id="dashboard-page" class="page active">
+            <div class="card">
+                <h3>🔥 Streak: <span id="streak">0 Days</span></h3>
+                <p>Total Workouts: <span id="total-workouts">0</span></p>
+            </div>
+            <div class="card">
+                <h4>Latest Workout</h4>
+                <div id="latest-workout">None</div>
+            </div>
+            <div class="card">
+                <h4>Personal Records</h4>
+                <div id="prs"></div>
+            </div>
+            <div id="achievements" class="card">
+                <h4>Achievements</h4>
+                <div id="achievements-list"></div>
+            </div>
+            <div class="card" style="border: 1px dashed #666; margin-top: 20px;">
+                <button onclick="exportData()" style="background:#607d8b; color:white; border:none; padding:10px; border-radius:5px; width:100%;">📥 Export Backup</button>
+            </div>
+        </div>
+
+        <!-- WORKOUT PAGE -->
+        <div id="workout-page" class="page" style="display:none;">
+            <!-- Management Card -->
+            <div class="card">
+                <h4>Manage Exercises</h4>
+                <input type="text" id="new-warmup-name" placeholder="New Warm-up Name">
+                <button onclick="addNewWarmupToList()" class="save-btn">Add Warm-up</button>
+                <hr>
+                <input type="text" id="new-exercise-name" placeholder="New Exercise Name">
+                <button onclick="addNewExerciseToList()" class="save-btn">Add Exercise</button>
+                <hr>
+                <button onclick="deleteExerciseFromList()" class="delete-btn" style="width:100%; background:#a82f2f; color:white; border:none; padding:10px; border-radius:5px;">🗑️ Delete Selected from List</button>
+            </div>
+
+            <!-- Warm-up Card -->
+            <div class="card" style="border-left: 5px solid #ff9800;">
+                <h3>🔥 Pre-specific Warm Up</h3>
+                <select id="warmup-builder"></select>
+                <input type="number" id="warmup-reps" placeholder="Reps (3 sets auto)">
+                <button onclick="addWarmupToWorkout()" class="save-btn" style="background:#ff9800; color:white">➕ Add Warm-up</button>
+            </div>
+
+            <!-- Main Builder Card -->
+            <div class="card" style="border-left: 5px solid #2196F3;">
+                <h3>💪 Main Workout Builder</h3>
+                <select id="exercise-builder"></select>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top:10px;">
+                    <input type="number" id="set1" placeholder="Set 1">
+                    <input type="number" id="set2" placeholder="Set 2">
+                    <input type="number" id="set3" placeholder="Set 3">
+                    <input type="number" id="set4" placeholder="Set 4">
+                </div>
+                <textarea id="workout-notes" placeholder="Exercise notes..." style="width:100%; margin-top:10px;"></textarea>
+                <button onclick="addExercise()" class="save-btn" style="background:#2196F3; color:white">➕ Add Exercise</button>
+            </div>
+
+            <!-- Current Session Preview -->
+            <div id="current-workout"></div>
+
+            <!-- SESSION SUMMARY BOX (MUST BE ABOVE THE SAVE BUTTON) -->
+            <div class="card" style="border-top: 2px solid #e94560;">
+                <h4>Session Summary</h4>
+                <textarea id="session-summary" placeholder="Overall workout notes (Energy, Focus, etc.)"></textarea>
+            </div>
+
+            <!-- FINAL SAVE BUTTON -->
+            <button onclick="saveFullWorkout()" class="save-btn" style="width:100%; background:#4CAF50; padding:15px; margin-top:10px; color:white; border:none; border-radius:5px; font-size:16px; font-weight:bold;">✅ Save Full Workout</button>
+        </div>
+
+        <!-- SKILLS PAGE -->
+        <div id="skills-page" class="page" style="display:none;">
+            <h2>Skill Trees</h2>
+            <div class="card">
+                <h4>Planche Progress <span id="planche-progress-text">0%</span></h4>
+                <div class="progress-container"><div id="planche-progress-bar" class="progress-bar"></div></div>
+                <div id="planche-skills">
+                    <button class="skill-btn" data-index="0" onclick="toggleSkill(this)">Frog Stand</button>
+                    <button class="skill-btn" data-index="1" onclick="toggleSkill(this)">Tuck Planche</button>
+                    <button class="skill-btn" data-index="2" onclick="toggleSkill(this)">Advanced Tuck</button>
+                    <button class="skill-btn" data-index="3" onclick="toggleSkill(this)">Straddle Planche</button>
+                    <button class="skill-btn" data-index="4" onclick="toggleSkill(this)">Full Planche</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HISTORY PAGE -->
+        <div id="history-page" class="page" style="display:none;">
+            <h2>History</h2>
+            <div id="workout-history-list"></div>
+        </div>
+    </main>
+
+    <nav>
+        <button onclick="showPage('dashboard-page')"><span>🏠</span>Home</button>
+        <button onclick="showPage('workout-page')"><span>💪</span>Workout</button>
+        <button onclick="showPage('skills-page')"><span>🎯</span>Skills</button>
+        <button onclick="showPage('history-page')"><span>📜</span>History</button>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>
