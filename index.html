@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BreakPoint Pro</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="stylesheet" href="style.css">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+    body { font-family: 'Inter', sans-serif !important; }
+</style>
+</head>
+<body>
+
+    <header>
+        <img src="logo.png" alt="BreakPoint Logo" class="logo">
+        <p></p>
+    </header>
+
+    <main>
+        <!-- 1. DASHBOARD PAGE -->
+        <div id="dashboard-page" class="page active">
+            <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="margin:0; border:none; padding:0;">🔥 STREAK: <span id="streak">0 Days</span></h3>
+                    <p style="margin:5px 0 0 0; opacity: 0.8;">Total Workouts: <span id="total-workouts">0</span> | Weight: <span id="latest-weight">--</span></p>
+                </div>
+            </div>
+
+            <!-- REST DAY RECOVERY CHECK-IN CARD -->
+            <div class="card" id="recovery-checkin-card" style="border-top: 4px solid #00bcd4; margin-top: 20px;">
+                <h4 style="margin:0 0 10px 0; border:none; padding:0; color:#00bcd4; font-size:0.8rem; letter-spacing:1px;">🧘 REST DAY RECOVERY CHECK-IN</h4>
+                <p style="font-size:0.75rem; color:#aaa; margin-bottom:15px;">Assess your recovery on a rest day to update your readiness score on the dashboard.</p>
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+                    <label style="font-size:0.85rem; color:#eee;">Recovery Level: <span id="recovery-value" style="color:#00bcd4; font-weight:bold;">5</span>/10</label>
+                </div>
+                <input type="range" id="recovery-slider" min="1" max="10" value="5" step="1" 
+                       oninput="document.getElementById('recovery-value').textContent = this.value" 
+                       style="width: 100%; accent-color: #00bcd4; margin-bottom:15px;">
+                <button onclick="logRecovery()" class="save-btn" style="background:#00bcd4; color:white; width:100%; font-weight:bold; padding:12px;">💾 Log Recovery Check-in</button>
+            </div>
+
+            <!-- BODYWEIGHT TRACKING CARD -->
+            <div class="card" id="bodyweight-card" style="border-top: 4px solid #9c27b0; margin-top: 20px;">
+                <h4 style="margin:0 0 10px 0; border:none; padding:0; color:#9c27b0; font-size:0.8rem; letter-spacing:1px;">⚖️ LOG BODYWEIGHT</h4>
+                <p style="font-size:0.75rem; color:#aaa; margin-bottom:15px;">Log your morning bodyweight to track composition progress over time.</p>
+                <div style="display:flex; gap: 10px; margin-bottom:15px;">
+                    <input type="number" id="bodyweight-input" placeholder="Weight" step="0.1" min="0" style="flex: 2;">
+                    <select id="bodyweight-unit" style="flex: 1; padding: 5px 10px; background: #222; color: white; border: 1px solid #555; border-radius: 4px;">
+                        <option value="kg">kg</option>
+                        <option value="lbs">lbs</option>
+                    </select>
+                </div>
+                <button onclick="logBodyweight()" class="save-btn" style="background:#9c27b0; color:white; width:100%; font-weight:bold; padding:12px;">💾 Log Weight</button>
+            </div>
+
+            <div id="prs"></div>
+
+
+          <div class="card" style="border: 1px dashed #666; margin-top: 20px; text-align: center;">
+        <h4 style="border:none; padding:0; margin-bottom:10px;">Data Management</h4>
+        <button onclick="exportData()" class="save-btn" style="background:#607d8b; margin:0; padding:12px; font-size:0.8rem;">📥 Export Backup</button>
+    </div>
+        </div>
+
+        <!-- 2. ROUTINES PAGE -->
+        <div id="routines-page" class="page" style="display:none;">
+            <h2 style="text-align:center; color:var(--text);">Workout Templates</h2>
+            <div id="routines-list"></div>
+        </div>
+
+        <!-- 3. WORKOUT PAGE -->
+        <div id="workout-page" class="page" style="display:none;">
+            <!-- REST TIMER -->
+            <div class="card" style="text-align: center; border: 1px solid #ffeb3b; background: rgba(255, 235, 59, 0.05);">
+                <h4 id="timer-label" style="margin:0; border:none; padding:0; color:#ffeb3b; font-size:0.7rem;">REST TIMER</h4>
+                <h2 id="timer-display" style="font-size: 2.5rem; margin: 5px 0; color: #ffeb3b; font-family: monospace;">00:00</h2>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="startRestTimer(60)" style="background: #333; flex: 1;">60s</button>
+                    <button onclick="startRestTimer(120)" style="background: #333; flex: 1;">2m</button>
+                    <button onclick="startRestTimer(180)" style="background: #333; flex: 1;">3m</button>
+                    <button onclick="stopRestTimer()" style="background: #a82f2f; flex: 1;">Stop</button>
+                </div>
+            </div>
+
+        <!-- STEP 1: READINESS CHECK -->
+<div class="card" style="border-top: 4px solid #4CAF50;">
+    <h2 style="margin: 0 0 10px 0; color: #4CAF50; border: none; padding: 0;">Welcome back! ⚡</h2>
+    <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 20px;">Let's assess your body's readiness before we start training.</p>
+    
+    <h4>Current Readiness</h4>
+    <label>Freshness: <span id="pre-fatigue-value" style="color:#4CAF50; font-weight:bold;">5</span>/10</label>
+    <input type="range" id="pre-fatigue-slider" min="1" max="10" value="5" step="1" 
+           oninput="document.getElementById('pre-fatigue-value').textContent = this.value" 
+           style="width: 100%; accent-color: #4CAF50;">
+    <p style="font-size: 0.7rem; color: #888; margin: 5px 0 0 0;">(1 = Exhausted, 10 = Fully Recovered)</p>
+</div>
+
+            <!-- MANAGEMENT -->
+            <div class="card">
+                <h4>Manage List</h4>
+                <input type="text" id="new-warmup-name" placeholder="New Warm-up Name">
+                <button onclick="addNewWarmupToList()" class="save-btn">Add Warm-up</button>
+                <hr style="margin:10px 0; opacity:0.1;">
+                <input type="text" id="new-exercise-name" placeholder="New Exercise Name">
+                <button onclick="addNewExerciseToList()" class="save-btn">Add Exercise</button>
+                <button onclick="deleteExerciseFromList()" class="delete-btn" style="width:100%; margin-top:5px;">🗑️ Delete Selected</button>
+                <button onclick="deleteWarmupFromList()" class="delete-btn" style="width:100%; margin-top:5px;">🗑️ Delete Selected Warmup</button>
+            </div>
+
+            <!-- BUILDERS -->
+            <div class="card" style="border-left: 5px solid #ff9800;">
+                <h3>🔥 Pre-Warm Up</h3>
+                <select id="warmup-builder"></select>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="number" id="warmup-reps" placeholder="Reps">
+                    <input type="number" id="warmup-sets" placeholder="Sets" value="1">
+                </div>
+                <!-- OPTIONAL SINGLE WEIGHT FIELD FOR WARM-UPS -->
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="number" id="warmup-weight" placeholder="Weight (Optional)" step="0.5" min="0" style="flex: 2;">
+                </div>
+                <button onclick="addWarmupToWorkout()" class="save-btn" style="background:#ff9800; color:white">➕ Add Warmup</button>
+            </div>
+
+            <div class="card" style="border-left: 5px solid #2196F3;">
+                <div style="display:flex; justify-content:space-between;">
+                    <h3>💪 Work Sets</h3>
+                    <label style="font-size:0.7rem;"><input type="checkbox" id="is-hold"> Hold (s)</label>
+                </div>
+                <select id="exercise-builder"></select>
+                
+                <!-- DYNAMIC SET CONTAINER -->
+                <div id="sets-container" style="display: flex; flex-direction: column; gap: 5px; margin-top:10px;">
+                    <!-- Set 1 -->
+                    <div class="set-row" style="display: flex; gap: 5px; align-items: center;">
+                        <span class="set-label" style="font-size: 0.8rem; min-width: 24px; color: #aaa;">S1</span>
+                        <input type="number" class="set-reps" placeholder="Reps" style="flex: 1.2;">
+                        <input type="number" class="set-weight" placeholder="Wt" step="0.5" min="0" style="flex: 1; text-align: center;">
+                    </div>
+                    <!-- Set 2 -->
+                    <div class="set-row" style="display: flex; gap: 5px; align-items: center;">
+                        <span class="set-label" style="font-size: 0.8rem; min-width: 24px; color: #aaa;">S2</span>
+                        <input type="number" class="set-reps" placeholder="Reps" style="flex: 1.2;">
+                        <input type="number" class="set-weight" placeholder="Wt" step="0.5" min="0" style="flex: 1; text-align: center;">
+                    </div>
+                    <!-- Set 3 -->
+                    <div class="set-row" style="display: flex; gap: 5px; align-items: center;">
+                        <span class="set-label" style="font-size: 0.8rem; min-width: 24px; color: #aaa;">S3</span>
+                        <input type="number" class="set-reps" placeholder="Reps" style="flex: 1.2;">
+                        <input type="number" class="set-weight" placeholder="Wt" step="0.5" min="0" style="flex: 1; text-align: center;">
+                    </div>
+                </div>
+
+                <!-- SET MANIPULATION BUTTONS -->
+                <div style="display: flex; gap: 5px; margin-top: 8px;">
+                    <button type="button" onclick="addSetRow()" class="save-btn" style="background: #333; margin: 0; padding: 6px; font-size: 0.75rem; flex: 1;">➕ Add Set</button>
+                    <button type="button" onclick="removeLastSetRow()" class="delete-btn" style="margin: 0; padding: 6px; font-size: 0.75rem; flex: 1;">🗑️ Remove Set</button>
+                </div>
+
+                <!-- UNIT SELECTOR FOR THE WORK SETS -->
+                <div style="display: flex; justify-content: flex-end; margin-top: 5px;">
+                    <select id="exercise-weight-unit" style="padding: 5px 10px; font-size: 0.8rem; background: #222; color: white; border: 1px solid #555; border-radius: 4px;">
+                        <option value="kg">kg</option>
+                        <option value="lbs">lbs</option>
+                    </select>
+                </div>
+
+                <textarea id="workout-notes" placeholder="Notes..."></textarea>
+                <button onclick="addExercise()" class="save-btn" style="background:#2196F3; color:white">➕ Add Exercise</button>
+            </div>
+
+            <div id="current-workout"></div>
+<!-- SUMMARY & SAVE -->
+<div class="card" style="border-top: 2px solid #e94560;">
+    <h2 style="margin: 0 0 10px 0; color: #e94560; border: none; padding: 0;">Session Complete! 🔥</h2>
+    <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 20px;">Great work. Take a second to log your effort and energy levels.</p>
+
+    <h4>Post-Workout Fatigue</h4>
+    <label>Exertion Level: <span id="fatigue-value" style="color:#ffeb3b; font-weight:bold;">5</span>/10</label>
+    <input type="range" id="fatigue-slider" min="1" max="10" value="5" 
+           oninput="document.getElementById('fatigue-value').textContent = this.value" 
+           style="width: 100%; accent-color: #e94560;">
+    
+    <textarea id="session-summary" placeholder="Summary (Energy, focus, specific pains, etc)..." style="margin-top:10px;"></textarea>
+</div>
+
+       <div class="card" style="border: 1px dashed #ffeb3b; background: transparent;">
+    <h4>Save as Template</h4>
+    <input type="text" id="routine-name" placeholder="Routine Name (e.g. Push Day)">
+    
+    <!-- Added the 'btn-template' class here -->
+    <button onclick="saveAsRoutine()" class="btn-template">
+        💾 Save Current Session as Routine
+    </button>
+    
+    <button onclick="saveFullWorkout()" class="save-btn" 
+    style="background:#4CAF50; color:white; padding:18px; margin-top:20px; font-size:1rem; font-weight:900; letter-spacing:1px; box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);">
+    ✅ FINISH & SAVE WORKOUT
+</button>
+</div>
+
+        </div>
+
+        <!-- 4. SKILLS PAGE -->
+        <div id="skills-page" class="page" style="display:none;">
+            <h2 style="text-align:center; color:var(--accent);">Skill Progressions</h2>
+            <div class="card skill-card" style="border-top: 4px solid #ff5722;">
+                <div class="skill-header"><h3>🦅 Planche Path</h3><span id="planche-percent">0%</span></div>
+                <div class="progress-container"><div id="planche-bar" class="progress-bar" style="background: #ff5722;"></div></div>
+                <div id="planche-tree" class="tree-grid"></div>
+            </div>
+            <div class="card skill-card" style="border-top: 4px solid #ffeb3b; margin-top: 20px;">
+                <div class="skill-header"><h3>🤸 Handstand Path</h3><span id="handstand-percent">0%</span></div>
+                <div class="progress-container"><div id="handstand-bar" class="progress-bar" style="background: #ffeb3b;"></div></div>
+                <div id="handstand-tree" class="tree-grid"></div>
+            </div>
+            <div class="card skill-card" style="border-top: 4px solid #2196F3; margin-top: 20px;">
+                <div class="skill-header"><h3>🕹️ Front Lever Path</h3><span id="lever-percent">0%</span></div>
+                <div class="progress-container"><div id="lever-bar" class="progress-bar" style="background: #2196F3;"></div></div>
+                <div id="lever-tree" class="tree-grid"></div>
+            </div>
+        </div>
+
+        <!-- 5. HISTORY PAGE -->
+        <div id="history-page" class="page" style="display:none;">
+            <h2>History</h2>
+            <div id="workout-history-list"></div>
+        </div>
+
+        <!-- 6. STATS PAGE -->
+        <div id="stats-page" class="page" style="display:none;">
+            <h2 style="text-align:center; color:#9c27b0;">Bodyweight History</h2>
+            <div id="bodyweight-history-list"></div>
+        </div>
+    </main>
+
+    <nav>
+        <button onclick="showPage('dashboard-page')"><span>🏠</span>Home</button>
+        <button onclick="showPage('routines-page')"><span>📋</span>Routines</button>
+        <button onclick="showPage('workout-page')"><span>💪</span>Workout</button>
+        <button onclick="showPage('skills-page')"><span>🎯</span>Skills</button>
+        <button onclick="showPage('history-page')"><span>📜</span>History</button>
+        <button onclick="showPage('stats-page')"><span>⚖️</span>Stats</button>
+    </nav>
+
+    <script src="app.js"></script>
+</body>
+</html>
